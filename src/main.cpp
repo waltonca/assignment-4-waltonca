@@ -61,28 +61,93 @@ std::vector<Employee> readEmployeesFromFile(const std::string& filePath) {
     return employees;
 }
 
+// mergesort function
+template <typename T>
+void merge_sort(std::vector<T>& vec, int field_index) {
+    if (vec.size() <= 1) return;
+
+    std::vector<T> left(vec.begin(), vec.begin() + vec.size() / 2);
+    std::vector<T> right(vec.begin() + vec.size() / 2, vec.end());
+
+    merge_sort(left, field_index);
+    merge_sort(right, field_index);
+
+    size_t i = 0, j = 0, k = 0;
+    while (i < left.size() && j < right.size()) {
+        bool condition = false;
+        // According to the field index, decide the basis for sorting
+        if (field_index == 13) {
+            condition = left[i].hourlyRate < right[j].hourlyRate;
+        } else if (field_index == 1) { // lastName (字段 1)
+            condition = left[i].lastName < right[j].lastName;
+        }
+        // Add more here...
+
+        if (condition) {
+            vec[k++] = left[i++];
+        } else {
+            vec[k++] = right[j++];
+        }
+    }
+
+    while (i < left.size()) vec[k++] = left[i++];
+    while (j < right.size()) vec[k++] = right[j++];
+}
+
+// Print employees
+void printEmployees(const std::vector<Employee>& employees) {
+    for (const auto& emp : employees) {
+        std::cout << std::left << std::setw(10) << emp.id
+                  << std::setw(15) << emp.lastName
+                  << std::setw(15) << emp.firstName
+                  << std::setw(30) << emp.address
+                  << std::setw(20) << emp.city
+                  << std::setw(5) << emp.province
+                  << std::setw(10) << emp.postalCode
+                  << std::setw(15) << emp.phone
+                  << std::setw(5) << emp.gender
+                  << std::setw(5) << emp.age
+                  << std::setw(5) << emp.numDependents
+                  << std::setw(10) << emp.department
+                  << std::setw(5) << emp.unionMember
+                  << std::setw(5) << emp.hourlyRate
+                  << "\n";
+    }
+}
+
 int main(int argc, char* argv[]) {
     // Receives a file path as an argument
-    if (argc != 2) {
-        std::cerr << "Usage: mergesort <path/to/employees.txt>\n";
+    if (argc != 3) {
+        std::cerr << "Usage: mergesort <path/to/employees.txt> -field=<column_index>\n";
         return 1;
     }
 
     std::string filePath = argv[1];
+    std::string fieldStr = argv[2];
+
+    // Parsing Field Indexes
+    int field_index = -1;
+    if (fieldStr.find("-field=") == 0) {
+        field_index = std::stoi(fieldStr.substr(7)); // Extracting field indexes
+    }
+
+    if (field_index == -1) {
+        std::cerr << "Invalid field index.\n";
+        return 1;
+    }
 
     try {
-        // Read file and print data
         auto employees = readEmployeesFromFile(filePath);
-        std::cout << "Successfully read " << employees.size() << " employees from the file.\n";
 
-        // use loop print all data
-        for (const auto& emp : employees) {
-            std::cout << emp.id << "\t" << emp.lastName << "\t" << emp.firstName << "\t"
-                      << emp.address << "\t" << emp.city << "\t" << emp.province << "\t"
-                      << emp.postalCode << "\t" << emp.phone << "\t" << emp.gender << "\t"
-                      << emp.age << "\t" << emp.numDependents << "\t" << emp.department << "\t"
-                      << emp.unionMember << "\t" << emp.hourlyRate << "\n";
-        }
+        std::cout << "Unsorted Employee Data:\n";
+        printEmployees(employees);
+
+        // perform merge sort
+        merge_sort(employees, field_index);
+
+        std::cout << "Sorted Employee Data (Field " << field_index << "):\n";
+        printEmployees(employees);
+
     } catch (const std::exception& ex) {
         std::cerr << "Error: " << ex.what() << '\n';
         return 1;
