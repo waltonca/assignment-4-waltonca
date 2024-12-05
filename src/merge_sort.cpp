@@ -9,12 +9,15 @@
 void merge_sort(std::vector<Employee>& employees, int field_index) {
     if (employees.size() <= 1) return;
 
+    // Divide the Vector into Halves:
     std::vector<Employee> left(employees.begin(), employees.begin() + employees.size() / 2);
     std::vector<Employee> right(employees.begin() + employees.size() / 2, employees.end());
 
+    // Recursive Calls
     merge_sort(left, field_index);
     merge_sort(right, field_index);
 
+    // Merge the Sorted Halves
     size_t i = 0, j = 0, k = 0;
     while (i < left.size() && j < right.size()) {
         bool condition = false;
@@ -49,6 +52,7 @@ void merge_sort(std::vector<Employee>& employees, int field_index) {
             condition = left[i].unionMember < right[j].unionMember;
         }
 
+        // Merging the Elements
         if (condition) {
             employees[k++] = left[i++];
         } else {
@@ -56,6 +60,7 @@ void merge_sort(std::vector<Employee>& employees, int field_index) {
         }
     }
 
+    // Copy Remaining Elements (if any)
     while (i < left.size()) employees[k++] = left[i++];
     while (j < right.size()) employees[k++] = right[j++];
 }
