@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <stdexcept>
+#include <iomanip> // For std::setw
 
 struct Employee {
   std::string id;
@@ -61,60 +62,100 @@ std::vector<Employee> readEmployeesFromFile(const std::string& filePath) {
     return employees;
 }
 
-// mergesort function
-template <typename T>
-void merge_sort(std::vector<T>& vec, int field_index) {
-    if (vec.size() <= 1) return;
+// Merge function to merge two sorted halves
+void merge(std::vector<Employee>& arr, int left, int mid, int right, int field_index) {
+    int n1 = mid - left + 1;
+    int n2 = right - mid;
 
-    std::vector<T> left(vec.begin(), vec.begin() + vec.size() / 2);
-    std::vector<T> right(vec.begin() + vec.size() / 2, vec.end());
+    std::vector<Employee> leftArr(n1), rightArr(n2);
 
-    merge_sort(left, field_index);
-    merge_sort(right, field_index);
+    // Copy data to temp arrays leftArr[] and rightArr[]
+    for (int i = 0; i < n1; i++) {
+        leftArr[i] = arr[left + i];
+    }
+    for (int j = 0; j < n2; j++) {
+        rightArr[j] = arr[mid + 1 + j];
+    }
 
-    size_t i = 0, j = 0, k = 0;
-    while (i < left.size() && j < right.size()) {
+    // Merge the temp arrays back into arr[left..right]
+    int i = 0, j = 0, k = left;
+    while (i < n1 && j < n2) {
         bool condition = false;
-        // According to the field index, decide the basis for sorting
-        if (field_index == 13) { // Sort by HourlyRate, numerically
-            condition = left[i].hourlyRate < right[j].hourlyRate;
-        } else if (field_index == 0) { // Sort by EmployeeID, alphanumerically
-            condition = left[i].id < right[j].id;
-        } else if (field_index == 9) { // Sort by Age, numerically
-            condition = left[i].age < right[j].age;
-        } else if (field_index == 11) { // Sort by Department alphabetically
-            condition = left[i].department < right[j].department;
-        } else if (field_index == 1) { // Sort by Last Name alphabetically
-            condition = left[i].lastName < right[j].lastName;
-        } else if (field_index == 2) { // Sort by First Name alphabetically
-            condition = left[i].firstName < right[j].firstName;
-        } else if (field_index == 3) { // Sort by Address alphabetically
-            condition = left[i].address < right[j].address;
-        } else if (field_index == 4) { // Sort by City alphabetically
-            condition = left[i].city < right[j].city;
-        } else if (field_index == 5) { // Sort by Province alphabetically
-            condition = left[i].province < right[j].province;
-        } else if (field_index == 6) { // Sort by PostalCode alphabetically
-            condition = left[i].postalCode < right[j].postalCode;
-        } else if (field_index == 7) { // Sort by Phone number alphabetically
-            condition = left[i].phone < right[j].phone;
-        } else if (field_index == 8) { // Sort by Gender alphabetically
-            condition = left[i].gender < right[j].gender;
-        } else if (field_index == 10) { // Sort by Number of Dependents numerically
-            condition = left[i].numDependents < right[j].numDependents;
-        } else if (field_index == 12) { // Sort by Union Member alphabetically
-            condition = left[i].unionMember < right[j].unionMember;
+
+        // Sorting logic based on field_index
+        switch (field_index) {
+            case 13: // Sort by HourlyRate, numerically
+                condition = leftArr[i].hourlyRate < rightArr[j].hourlyRate;
+                break;
+            case 0: // Sort by EmployeeID, alphanumerically
+                condition = leftArr[i].id < rightArr[j].id;
+                break;
+            case 9: // Sort by Age, numerically
+                condition = leftArr[i].age < rightArr[j].age;
+                break;
+            case 11: // Sort by Department alphabetically
+                condition = leftArr[i].department < rightArr[j].department;
+                break;
+            case 1: // Sort by Last Name alphabetically
+                condition = leftArr[i].lastName < rightArr[j].lastName;
+                break;
+            case 2: // Sort by First Name alphabetically
+                condition = leftArr[i].firstName < rightArr[j].firstName;
+                break;
+            case 3: // Sort by Address alphabetically
+                condition = leftArr[i].address < rightArr[j].address;
+                break;
+            case 4: // Sort by City alphabetically
+                condition = leftArr[i].city < rightArr[j].city;
+                break;
+            case 5: // Sort by Province alphabetically
+                condition = leftArr[i].province < rightArr[j].province;
+                break;
+            case 6: // Sort by PostalCode alphabetically
+                condition = leftArr[i].postalCode < rightArr[j].postalCode;
+                break;
+            case 7: // Sort by Phone number alphabetically
+                condition = leftArr[i].phone < rightArr[j].phone;
+                break;
+            case 8: // Sort by Gender alphabetically
+                condition = leftArr[i].gender < rightArr[j].gender;
+                break;
+            case 10: // Sort by Number of Dependents numerically
+                condition = leftArr[i].numDependents < rightArr[j].numDependents;
+                break;
+            case 12: // Sort by Union Member alphabetically
+                condition = leftArr[i].unionMember < rightArr[j].unionMember;
+                break;
         }
 
         if (condition) {
-            vec[k++] = left[i++];
+            arr[k++] = leftArr[i++];
         } else {
-            vec[k++] = right[j++];
+            arr[k++] = rightArr[j++];
         }
     }
 
-    while (i < left.size()) vec[k++] = left[i++];
-    while (j < right.size()) vec[k++] = right[j++];
+    // Copy the remaining elements of leftArr[] and rightArr[]
+    while (i < n1) {
+        arr[k++] = leftArr[i++];
+    }
+    while (j < n2) {
+        arr[k++] = rightArr[j++];
+    }
+}
+
+// Merge sort function to recursively divide and merge
+void mergeSort(std::vector<Employee>& arr, int left, int right, int field_index) {
+    if (left < right) {
+        int mid = left + (right - left) / 2;
+
+        // Recursively sort the first and second halves
+        mergeSort(arr, left, mid, field_index);
+        mergeSort(arr, mid + 1, right, field_index);
+
+        // Merge the sorted halves
+        merge(arr, left, mid, right, field_index);
+    }
 }
 
 // Print employees
@@ -138,9 +179,8 @@ void printEmployees(const std::vector<Employee>& employees) {
     }
 }
 
-// save file
+// Save employee data to file
 void saveEmployeeToFile(const std::vector<Employee>& employees) {
-    // Open the output file output/employees.txt (if the file does not exist it will be created)
     std::ofstream outFile("../output/employees.txt", std::ios::trunc); // Empty files on each run
 
     if (outFile.is_open()) {
@@ -162,7 +202,6 @@ void saveEmployeeToFile(const std::vector<Employee>& employees) {
                     << "\n";
         }
 
-        // Close the file after successful file write
         outFile.close();
     } else {
         std::cerr << "Unable to open file for writing\n";
@@ -172,7 +211,7 @@ void saveEmployeeToFile(const std::vector<Employee>& employees) {
 int main(int argc, char* argv[]) {
     // Receives a file path as an argument
     if (argc != 3) {
-        std::cerr << "Usage: mergesort <path/to/employees.txt> -field=<column_index>\n";
+        std::cerr << "Usage: mergesort <employees.txt> -field=<fieldno>\n";
         return 1;
     }
 
@@ -193,14 +232,9 @@ int main(int argc, char* argv[]) {
     try {
         auto employees = readEmployeesFromFile(filePath);
 
-        //std::cout << "Unsorted Employee Data:\n";
-        //printEmployees(employees);
+        // Perform merge sort
+        mergeSort(employees, 0, employees.size() - 1, field_index);
 
-        // perform merge sort
-        merge_sort(employees, field_index);
-
-        //std::cout << "Sorted Employee Data (Field " << field_index << "):\n";
-        //printEmployees(employees);
         saveEmployeeToFile(employees);
 
     } catch (const std::exception& ex) {
