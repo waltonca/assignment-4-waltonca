@@ -76,12 +76,35 @@ void merge_sort(std::vector<T>& vec, int field_index) {
     while (i < left.size() && j < right.size()) {
         bool condition = false;
         // According to the field index, decide the basis for sorting
-        if (field_index == 13) {
+        if (field_index == 13) { // Sort by HourlyRate, numerically
             condition = left[i].hourlyRate < right[j].hourlyRate;
-        } else if (field_index == 1) { // lastName (字段 1)
+        } else if (field_index == 0) { // Sort by EmployeeID, alphanumerically
+            condition = left[i].id < right[j].id;
+        } else if (field_index == 9) { // Sort by Age, numerically
+            condition = left[i].age < right[j].age;
+        } else if (field_index == 11) { // Sort by Department alphabetically
+            condition = left[i].department < right[j].department;
+        } else if (field_index == 1) { // Sort by Last Name alphabetically
             condition = left[i].lastName < right[j].lastName;
+        } else if (field_index == 2) { // Sort by First Name alphabetically
+            condition = left[i].firstName < right[j].firstName;
+        } else if (field_index == 3) { // Sort by Address alphabetically
+            condition = left[i].address < right[j].address;
+        } else if (field_index == 4) { // Sort by City alphabetically
+            condition = left[i].city < right[j].city;
+        } else if (field_index == 5) { // Sort by Province alphabetically
+            condition = left[i].province < right[j].province;
+        } else if (field_index == 6) { // Sort by PostalCode alphabetically
+            condition = left[i].postalCode < right[j].postalCode;
+        } else if (field_index == 7) { // Sort by Phone number alphabetically
+            condition = left[i].phone < right[j].phone;
+        } else if (field_index == 8) { // Sort by Gender alphabetically
+            condition = left[i].gender < right[j].gender;
+        } else if (field_index == 10) { // Sort by Number of Dependents numerically
+            condition = left[i].numDependents < right[j].numDependents;
+        } else if (field_index == 12) { // Sort by Union Member alphabetically
+            condition = left[i].unionMember < right[j].unionMember;
         }
-        // Add more here...
 
         if (condition) {
             vec[k++] = left[i++];
@@ -115,6 +138,37 @@ void printEmployees(const std::vector<Employee>& employees) {
     }
 }
 
+// save file
+void saveEmployeeToFile(const std::vector<Employee>& employees) {
+    // Open the output file output/employees.txt (if the file does not exist it will be created)
+    std::ofstream outFile("../output/employees.txt", std::ios::trunc); // Empty files on each run
+
+    if (outFile.is_open()) {
+        for (const auto& emp : employees) {
+            outFile << std::left << std::setw(10) << emp.id
+                    << std::setw(15) << emp.lastName
+                    << std::setw(15) << emp.firstName
+                    << std::setw(30) << emp.address
+                    << std::setw(20) << emp.city
+                    << std::setw(5) << emp.province
+                    << std::setw(10) << emp.postalCode
+                    << std::setw(15) << emp.phone
+                    << std::setw(5) << emp.gender
+                    << std::setw(5) << emp.age
+                    << std::setw(5) << emp.numDependents
+                    << std::setw(10) << emp.department
+                    << std::setw(5) << emp.unionMember
+                    << std::setw(5) << emp.hourlyRate
+                    << "\n";
+        }
+
+        // Close the file after successful file write
+        outFile.close();
+    } else {
+        std::cerr << "Unable to open file for writing\n";
+    }
+}
+
 int main(int argc, char* argv[]) {
     // Receives a file path as an argument
     if (argc != 3) {
@@ -139,14 +193,15 @@ int main(int argc, char* argv[]) {
     try {
         auto employees = readEmployeesFromFile(filePath);
 
-        std::cout << "Unsorted Employee Data:\n";
-        printEmployees(employees);
+        //std::cout << "Unsorted Employee Data:\n";
+        //printEmployees(employees);
 
         // perform merge sort
         merge_sort(employees, field_index);
 
-        std::cout << "Sorted Employee Data (Field " << field_index << "):\n";
-        printEmployees(employees);
+        //std::cout << "Sorted Employee Data (Field " << field_index << "):\n";
+        //printEmployees(employees);
+        saveEmployeeToFile(employees);
 
     } catch (const std::exception& ex) {
         std::cerr << "Error: " << ex.what() << '\n';
